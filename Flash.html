@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulation & Modelling — Flashcards</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+–navy:   #1F3864;
+–blue:   #2E5C8E;
+–sky:    #5B9BD5;
+–pale:   #D6E4F0;
+–mint:   #E8F5EE;
+–green:  #1A6B2A;
+–white:  #FFFFFF;
+–off:    #F7F9FC;
+–gray:   #4A5568;
+–light:  #A0AEC0;
+–border: #E2E8F0;
+–card-h: 340px;
+}
+
+body {
+font-family: ‘Inter’, sans-serif;
+background: var(–off);
+color: var(–gray);
+min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+background: var(–navy);
+padding: 20px 32px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 12px;
+}
+.header-title {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 1.25rem;
+font-weight: 700;
+color: var(–white);
+letter-spacing: -0.02em;
+}
+.header-title span { color: var(–sky); }
+.header-meta {
+font-size: 0.8rem;
+color: var(–pale);
+opacity: 0.8;
+}
+
+/* ── CHAPTER TABS ── */
+.tabs-wrap {
+background: var(–navy);
+padding: 0 32px 0;
+display: flex;
+gap: 4px;
+overflow-x: auto;
+scrollbar-width: none;
+border-bottom: 3px solid var(–blue);
+}
+.tabs-wrap::-webkit-scrollbar { display: none; }
+.tab {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 0.78rem;
+font-weight: 600;
+color: var(–pale);
+padding: 10px 16px;
+cursor: pointer;
+border-radius: 6px 6px 0 0;
+white-space: nowrap;
+transition: background 0.2s, color 0.2s;
+letter-spacing: 0.01em;
+border: none;
+background: transparent;
+}
+.tab:hover { background: rgba(255,255,255,0.08); color: var(–white); }
+.tab.active { background: var(–off); color: var(–navy); }
+
+/* ── MAIN AREA ── */
+main {
+max-width: 800px;
+margin: 0 auto;
+padding: 36px 24px 60px;
+}
+
+/* ── PROGRESS ── */
+.progress-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 20px;
+gap: 16px;
+}
+.progress-bar-wrap {
+flex: 1;
+height: 6px;
+background: var(–border);
+border-radius: 99px;
+overflow: hidden;
+}
+.progress-bar {
+height: 100%;
+background: linear-gradient(90deg, var(–blue), var(–sky));
+border-radius: 99px;
+transition: width 0.4s ease;
+}
+.progress-label {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 0.82rem;
+font-weight: 600;
+color: var(–blue);
+white-space: nowrap;
+}
+
+/* ── CARD ── */
+.card-scene {
+perspective: 1200px;
+width: 100%;
+min-height: var(–card-h);
+cursor: pointer;
+margin-bottom: 28px;
+}
+.card-inner {
+position: relative;
+width: 100%;
+min-height: var(–card-h);
+transform-style: preserve-3d;
+transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.card-scene.flipped .card-inner { transform: rotateY(180deg); }
+
+.card-face {
+position: absolute;
+width: 100%;
+min-height: var(–card-h);
+backface-visibility: hidden;
+-webkit-backface-visibility: hidden;
+border-radius: 16px;
+padding: 36px 40px;
+display: flex;
+flex-direction: column;
+}
+
+/* FRONT — question */
+.card-front {
+background: var(–navy);
+color: var(–white);
+border: none;
+justify-content: center;
+align-items: center;
+text-align: center;
+}
+.card-front .card-label {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 0.7rem;
+font-weight: 700;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: var(–sky);
+margin-bottom: 20px;
+}
+.card-front .card-q {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 1.35rem;
+font-weight: 600;
+line-height: 1.45;
+color: var(–white);
+max-width: 560px;
+}
+.card-front .flip-hint {
+position: absolute;
+bottom: 20px;
+right: 24px;
+font-size: 0.72rem;
+color: rgba(255,255,255,0.35);
+display: flex;
+align-items: center;
+gap: 5px;
+}
+.flip-icon { font-size: 0.9rem; }
+
+/* BACK — answer */
+.card-back {
+background: var(–white);
+border: 2px solid var(–border);
+transform: rotateY(180deg);
+justify-content: flex-start;
+}
+.card-back .card-label {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 0.7rem;
+font-weight: 700;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: var(–green);
+margin-bottom: 16px;
+}
+.card-back .answer-prose {
+font-size: 0.95rem;
+line-height: 1.65;
+color: var(–gray);
+margin-bottom: 12px;
+}
+.card-back ul {
+list-style: none;
+padding: 0;
+margin: 0;
+display: flex;
+flex-direction: column;
+gap: 7px;
+}
+.card-back ul li {
+display: flex;
+gap: 10px;
+font-size: 0.9rem;
+line-height: 1.55;
+color: var(–gray);
+}
+.card-back ul li::before {
+content: “•”;
+color: var(–blue);
+font-weight: 700;
+flex-shrink: 0;
+margin-top: 1px;
+}
+.card-back ul li strong {
+color: var(–navy);
+font-weight: 600;
+}
+
+/* ── NAV CONTROLS ── */
+.controls {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 12px;
+flex-wrap: wrap;
+}
+.btn {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 0.85rem;
+font-weight: 600;
+padding: 10px 22px;
+border-radius: 8px;
+border: none;
+cursor: pointer;
+transition: all 0.18s;
+letter-spacing: 0.01em;
+}
+.btn-prev {
+background: var(–white);
+color: var(–navy);
+border: 2px solid var(–border);
+}
+.btn-prev:hover { border-color: var(–blue); color: var(–blue); }
+.btn-next {
+background: var(–navy);
+color: var(–white);
+}
+.btn-next:hover { background: var(–blue); }
+.btn-shuffle {
+background: var(–pale);
+color: var(–navy);
+}
+.btn-shuffle:hover { background: var(–sky); color: var(–white); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── SCORE BADGES ── */
+.score-row {
+display: flex;
+justify-content: center;
+gap: 10px;
+margin-top: 22px;
+flex-wrap: wrap;
+}
+.score-badge {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 0.78rem;
+font-weight: 600;
+padding: 5px 14px;
+border-radius: 99px;
+cursor: pointer;
+border: none;
+transition: all 0.18s;
+}
+.badge-know   { background: #C6F6D5; color: #22543D; }
+.badge-know:hover   { background: #9AE6B4; }
+.badge-review { background: #FED7D7; color: #742A2A; }
+.badge-review:hover { background: #FEB2B2; }
+.badge-counts { background: var(–border); color: var(–gray); cursor: default; }
+
+/* ── CHAPTER TITLE ── */
+.chapter-title {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 0.78rem;
+font-weight: 600;
+color: var(–light);
+text-align: center;
+margin-bottom: 10px;
+letter-spacing: 0.03em;
+text-transform: uppercase;
+}
+
+/* ── COMPLETION ── */
+.done-banner {
+display: none;
+text-align: center;
+padding: 40px 24px;
+background: var(–white);
+border: 2px solid var(–border);
+border-radius: 16px;
+margin-bottom: 28px;
+}
+.done-banner.show { display: block; }
+.done-banner h2 {
+font-family: ‘Space Grotesk’, sans-serif;
+font-size: 1.6rem;
+color: var(–navy);
+margin-bottom: 8px;
+}
+.done-banner p { color: var(–gray); font-size: 0.95rem; }
+
+@media (max-width: 540px) {
+main { padding: 20px 14px 48px; }
+.card-face { padding: 28px 22px; }
+.card-front .card-q { font-size: 1.1rem; }
+header { padding: 16px 20px; }
+.tabs-wrap { padding: 0 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+.card-inner { transition: none; }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="header-title">Simulation &amp; <span>Modelling</span></div>
+  <div class="header-meta">Click a card to reveal the answer</div>
+</header>
+
+<div class="tabs-wrap" id="tabs"></div>
+
+<main>
+  <div class="progress-row">
+    <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+    <div class="progress-label" id="plabel"></div>
+  </div>
+
+  <div class="chapter-title" id="chTitle"></div>
+
+  <div class="card-scene" id="cardScene" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front" id="cardFront">
+        <div class="card-label">Question</div>
+        <div class="card-q" id="cardQ"></div>
+        <div class="flip-hint"><span class="flip-icon">↩</span> tap to reveal</div>
+      </div>
+      <div class="card-face card-back" id="cardBack">
+        <div class="card-label">Answer</div>
+        <div id="cardA"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="done-banner" id="doneBanner">
+    <h2>🎉 Chapter complete!</h2>
+    <p>You've gone through all cards in this chapter. Shuffle or pick another chapter.</p>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-prev" id="btnPrev" onclick="prevCard()">← Prev</button>
+    <button class="btn btn-shuffle" onclick="shuffleCards()">⇄ Shuffle</button>
+    <button class="btn btn-next" id="btnNext" onclick="nextCard()">Next →</button>
+  </div>
+
+  <div class="score-row">
+    <button class="score-badge badge-know" onclick="markCard('know')">✓ Got it</button>
+    <button class="score-badge badge-review" onclick="markCard('review')">↺ Review again</button>
+    <span class="score-badge badge-counts" id="scoreCounts"></span>
+  </div>
+</main>
+
+<script>
+const DATA = [
+  // ── CHAPTER 1 ──
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "What is the concept of simulation?",
+    prose: "The creation of an artificial environment that models the behavior of a real-world process or phenomenon.",
+    prose2: "Simulation can be used to test hypotheses, explore scenarios, and make predictions about how a system might behave under different conditions."
+  },
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "What is a Simulation?",
+    prose: "A Simulation of a system is the operation of a model, which is a representation of that system.",
+    prose2: "The model is amenable to manipulation which would be impossible, too expensive, or too impractical to perform on the system which it represents."
+  },
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "What is the goal of simulation?",
+    prose: "The goal of simulation is often to understand and optimize the behavior of the system being simulated.",
+    prose2: "Examples of simulations include flight simulators, climate models, and virtual reality environments."
+  },
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "What are the advantages of simulation?",
+    bullets: [
+      "<strong>Less Financial Risk</strong> — Allows you to test theories and avoid costly mistakes in real life.",
+      "<strong>Exact Repeated Testing</strong> — Test different theories time after time against the exact same circumstances.",
+      "<strong>Examine Long-Term Impacts</strong> — Accurately model the impact of years of use in just a few seconds.",
+      "<strong>Gain Insights for Process Improvement</strong> — Improvements can be integrated throughout an entire process."
+    ]
+  },
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "What are the disadvantages of simulation?",
+    bullets: [
+      "<strong>Higher Initial Investment</strong> — High cost in software license and computing power; small companies cannot afford them.",
+      "<strong>Accuracy depends on Input Data</strong> — Simulation results accuracy depends on input data and boundary conditions.",
+      "<strong>Not 100% Accurate.</strong>"
+    ]
+  },
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "When is simulation the appropriate tool?",
+    bullets: [
+      "Simulation enables the study of internal interaction of a subsystem with complex system.",
+      "Informational, organizational and environmental changes can be simulated and their effects found.",
+      "Simulation models designed for training make learning possible without the cost disruption.",
+      "Simulation can be used with new design and policies before implementation."
+    ]
+  },
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "What is Emulation?",
+    prose: "Emulation involves replicating the functionality of a particular system or device on another system or device.",
+    prose2: "Often used to run legacy software or hardware on modern systems, or to test software in a controlled environment."
+  },
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "What is Virtualization?",
+    prose: "Creating multiple virtual instances of a single physical system, allowing multiple users or applications to run on the same hardware without interfering with one another.",
+    prose2: "Often used in server environments where multiple virtual servers run on a single physical machine."
+  },
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "What is a Model?",
+    prose: "A Representation of an object, a system, or an idea in some form other than that of the entity itself. (Shannon)",
+    prose2: "The goal of modeling is to understand how the system works and predict its behavior under different conditions."
+  },
+  { ch: 1, chTitle: "Chapter 1: Introduction to Simulation & Modelling",
+    q: "What are the types of Models?",
+    bullets: [
+      "<strong>Physical</strong> — Scale models, prototype plants.",
+      "<strong>Mathematical</strong> — Analytical queuing models, linear programs, simulation."
+    ]
+  },
+
+  // ── CHAPTER 2 ──
+  { ch: 2, chTitle: "Chapter 2: Continuous, Discrete-Event, Combined Models",
+    q: "What is Modeling?",
+    prose: "Modeling is the process of creating a simplified representation of a real-world system so that it can be studied, analyzed, and understood.",
+    prose2: "Examples: A map is a model of a real place; a mathematical equation modeling population growth."
+  },
+  { ch: 2, chTitle: "Chapter 2: Continuous, Discrete-Event, Combined Models",
+    q: "What is Continuous Modeling?",
+    prose: "Represents systems that change continuously over time using mathematical equations (often differential equations).",
+    bullets: [
+      "<strong>Examples:</strong> Temperature change in a room, Population growth, Water flow in a river.",
+      "<strong>Advantages:</strong> Accurate for physical systems, Good for scientific simulations, Mathematical precision."
+    ]
+  },
+  { ch: 2, chTitle: "Chapter 2: Continuous, Discrete-Event, Combined Models",
+    q: "What is Discrete-Event Modeling?",
+    prose: "Represents systems where changes occur at specific points in time (events). The system state changes only when an event happens.",
+    bullets: [
+      "<strong>Examples:</strong> Customers arriving at a bank, Queue system in a hospital, Network packet transmission.",
+      "<strong>Advantages:</strong> Efficient for business systems, Flexible modeling, Easy simulation."
+    ]
+  },
+  { ch: 2, chTitle: "Chapter 2: Continuous, Discrete-Event, Combined Models",
+    q: "What is Combined (Hybrid) Modeling?",
+    prose: "Combines both continuous and discrete-event modeling. Used when a system has both continuous changes and sudden events.",
+    bullets: [
+      "<strong>Examples:</strong> Traffic system (continuous movement + traffic lights/events), Manufacturing systems.",
+      "<strong>Advantages:</strong> High accuracy, Flexible, Real-world application.",
+      "<strong>Disadvantage:</strong> High cost."
+    ]
+  },
+  { ch: 2, chTitle: "Chapter 2: Continuous, Discrete-Event, Combined Models",
+    q: "What is the conclusion regarding model selection?",
+    bullets: [
+      "Choose model based on problem.",
+      "Understanding improves results.",
+      "Hybrid is powerful but complex."
+    ]
+  },
+
+  // ── CHAPTER 3 ──
+  { ch: 3, chTitle: "Chapter 3: The Modeling Process",
+    q: "What is the Modeling Process?",
+    prose: "A structured approach to building a simulation model.",
+    bullets: [
+      "<strong>Purpose:</strong> Represent real systems and support decision making.",
+      "<strong>Importance:</strong> Improves accuracy, reduces errors, helps understand systems."
+    ]
+  },
+  { ch: 3, chTitle: "Chapter 3: The Modeling Process",
+    q: "What are the 11 steps of the Modeling Process?",
+    bullets: [
+      "Step 1 — <strong>Problem Definition:</strong> Define the system problem clearly.",
+      "Step 2 — <strong>Objective Setting:</strong> Define what the model should achieve.",
+      "Step 3 — <strong>System Understanding:</strong> Study how the real system works.",
+      "Step 4 — <strong>Data Collection:</strong> Gather required data (arrival times, service times).",
+      "Step 5 — <strong>Model Formulation:</strong> Build a mathematical or logical model.",
+      "Step 6 — <strong>Model Implementation:</strong> Convert model into simulation software.",
+      "Step 7 — <strong>Verification:</strong> Check if model is built correctly.",
+      "Step 8 — <strong>Validation:</strong> Check if model represents real system.",
+      "Step 9 — <strong>Experimentation:</strong> Run different scenarios using the model.",
+      "Step 10 — <strong>Output Analysis:</strong> Analyze simulation results.",
+      "Step 11 — <strong>Documentation:</strong> Record model structure and results."
+    ]
+  },
+  { ch: 3, chTitle: "Chapter 3: The Modeling Process",
+    q: "What is Model Scope?",
+    prose: "Defines boundaries of the model. Example: Include customers but exclude suppliers.",
+    bullets: ["Prevents complexity, focuses analysis, and improves efficiency."]
+  },
+  { ch: 3, chTitle: "Chapter 3: The Modeling Process",
+    q: "What are Assumptions in Modeling?",
+    prose: "Assumptions are the foundational inputs, simplifications, and underlying conditions that define how a system is represented.",
+    bullets: [
+      "Makes modeling possible and reduces complexity.",
+      "<strong>Risk:</strong> Too many assumptions reduce accuracy.",
+      "<strong>Common:</strong> Arrival rates are random; Service time is constant; System is stable."
+    ]
+  },
+
+  // ── CHAPTER 4 ──
+  { ch: 4, chTitle: "Chapter 4: Statistics & Monte Carlo Analysis",
+    q: "What is Statistics?",
+    prose: "Study of data collection, analysis, and interpretation.",
+    bullets: [
+      "<strong>Descriptive Statistics</strong> — Summarize and organize data features (e.g., mean, median, graphs).",
+      "<strong>Inferential Statistics</strong> — Use sample data to make predictions about a larger population."
+    ]
+  },
+  { ch: 4, chTitle: "Chapter 4: Statistics & Monte Carlo Analysis",
+    q: "What is Probability?",
+    prose: "The likelihood of an event occurring. Range: 0 to 1.",
+    prose2: "Example: Probability of system failure = 0.2."
+  },
+  { ch: 4, chTitle: "Chapter 4: Statistics & Monte Carlo Analysis",
+    q: "What are the types of Probability Distributions?",
+    bullets: [
+      "<strong>Discrete</strong> — Finite values. Common: Binomial, Poisson. Example: Number of login attempts.",
+      "<strong>Continuous</strong> — Infinite values. Common: Normal distribution. Example: Time taken to process request."
+    ]
+  },
+  { ch: 4, chTitle: "Chapter 4: Statistics & Monte Carlo Analysis",
+    q: "What is Monte Carlo Simulation?",
+    prose: "Simulation that makes use of internally generated (pseudo) random numbers to imitate the behavior of the system.",
+    prose2: "Models are an abstraction of reality and always have limits of credibility."
+  },
+  { ch: 4, chTitle: "Chapter 4: Statistics & Monte Carlo Analysis",
+    q: "What are the steps in Monte Carlo Simulation?",
+    bullets: ["1. Define problem.", "2. Generate random inputs.", "3. Run simulation.", "4. Analyze results."]
+  },
+  { ch: 4, chTitle: "Chapter 4: Statistics & Monte Carlo Analysis",
+    q: "How are simulation models classified?",
+    bullets: [
+      "<strong>Static vs. Dynamic</strong> — Static: simulation solution to integral. Dynamic: systems that evolve over time.",
+      "<strong>Deterministic vs. Stochastic</strong> — Deterministic: no randomness. Stochastic: randomly modeled arrivals.",
+      "<strong>Continuous vs. Discrete</strong> — Continuous: smooth motion. Discrete: events occur at discrete times."
+    ]
+  },
+  { ch: 4, chTitle: "Chapter 4: Statistics & Monte Carlo Analysis",
+    q: "What is Verification, Validation, and Accreditation?",
+    bullets: [
+      "<strong>Verification</strong> — Whether software correctly implements the specified model.",
+      "<strong>Validation</strong> — Whether the simulation model is an acceptable representation of reality.",
+      "<strong>Accreditation</strong> — Official determination that a simulation is acceptable for particular purpose(s)."
+    ]
+  },
+
+  // ── CHAPTER 5 ──
+  { ch: 5, chTitle: "Chapter 5: Model Analysis — Verification, Validation & Sensitivity Analysis",
+    q: "What is Model Analysis?",
+    prose: "The systematic process of detecting and correcting errors in a simulation model.",
+    bullets: [
+      "<strong>Verification</strong> — Did we build the model right?",
+      "<strong>Validation</strong> — Did we build the right model?",
+      "<strong>Sensitivity Analysis</strong> — Which inputs drive the outputs?"
+    ]
+  },
+  { ch: 5, chTitle: "Chapter 5: Model Analysis — Verification, Validation & Sensitivity Analysis",
+    q: "What Verification techniques are used?",
+    bullets: [
+      "<strong>Structured Walkthroughs</strong> — Team reviews the conceptual model and code side-by-side.",
+      "<strong>Debugging & Tracing</strong> — Observe individual entity movements through the model.",
+      "<strong>Degenerate Test Cases</strong> — Run model with extreme or zero-input conditions.",
+      "<strong>Animation & Visual Inspection</strong> — Run simulation at slow speed to spot logical errors."
+    ]
+  },
+  { ch: 5, chTitle: "Chapter 5: Model Analysis — Verification, Validation & Sensitivity Analysis",
+    q: "What are common Verification errors?",
+    bullets: [
+      "<strong>E01 Wrong Distribution</strong> — Using Normal distribution for quantities that cannot be negative.",
+      "<strong>E02 Initialisation Bias</strong> — Starting in an empty state when the real system is never empty.",
+      "<strong>E03 Unit Mismatch</strong> — Service times in seconds but inter-arrival times in minutes.",
+      "<strong>E04 Routing Logic Error</strong> — Entities sent to the wrong resource.",
+      "<strong>E05 Resource Capacity Error</strong> — Setting server count incorrectly.",
+      "<strong>E06 Random Seed Misuse</strong> — Using the same seed for all replications."
+    ]
+  },
+  { ch: 5, chTitle: "Chapter 5: Model Analysis — Verification, Validation & Sensitivity Analysis",
+    q: "What Validation methods are used?",
+    bullets: [
+      "<strong>Face Validity</strong> — Present model behaviour to domain experts. Does this make sense?",
+      "<strong>Historical Data Validation</strong> — Calibrate model then compare against withheld real data.",
+      "<strong>Turing Test</strong> — Experts cannot reliably distinguish real from simulated results.",
+      "<strong>Predictive Validation</strong> — Predict future behaviour then compare against actual outcomes.",
+      "<strong>Extreme-Value Testing</strong> — Set inputs to extremes; check outputs respond logically.",
+      "<strong>Multi-Model Comparison</strong> — Two independent models of the same system cross-checked."
+    ]
+  },
+  { ch: 5, chTitle: "Chapter 5: Model Analysis — Verification, Validation & Sensitivity Analysis",
+    q: "What is Sensitivity Analysis and why is it important?",
+    prose: "SA determines how changes in input parameters propagate into output variation.",
+    prose2: "If ±10% change in parameter A causes ±30% output change, A is the critical parameter requiring precise estimation."
+  },
+  { ch: 5, chTitle: "Chapter 5: Model Analysis — Verification, Validation & Sensitivity Analysis",
+    q: "What are the Sensitivity Analysis methods?",
+    bullets: [
+      "<strong>OAT (One-at-a-Time)</strong> — Change one parameter at a time; simple but misses interaction effects.",
+      "<strong>Tornado Diagram</strong> — Parameters ranked by output range; longer bar = higher sensitivity.",
+      "<strong>Morris Method</strong> — Low cost screening; computes mean and standard deviation of effects.",
+      "<strong>Sobol' Indices</strong> — Full variance decomposition; captures all interaction effects."
+    ]
+  },
+  { ch: 5, chTitle: "Chapter 5: Model Analysis — Verification, Validation & Sensitivity Analysis",
+    q: "What is the Warm-Up Period?",
+    prose: "A simulation starts in an artificial empty state. Data collection must wait until the system reaches steady-state.",
+    bullets: [
+      "<strong>Welch's method</strong> — Plot moving average; warm-up ends when plot stabilises.",
+      "<strong>Rule of thumb</strong> — Warm-up = 5–10× mean cycle time. Delete warm-up data from results."
+    ]
+  },
+  { ch: 5, chTitle: "Chapter 5: Model Analysis — Verification, Validation & Sensitivity Analysis",
+    q: "How many replications should be run?",
+    prose: "Never report a single run. Always report mean ± CI across ≥5 replications with independent seeds.",
+    prose2: "Formula: n ≥ (z_{α/2} × s / h)² where h = half-width target."
+  },
+
+  // ── CHAPTER 6 ──
+  { ch: 6, chTitle: "Chapter 6: Software-Intensive Systems — Manufacturing & Services",
+    q: "What is a Software-Intensive System (SIS)?",
+    prose: "Any system where software contributes essential influences to the design, construction, deployment, and evolution of the system as a whole. (IEEE Std 1471-2000)",
+    bullets: [
+      "<strong>Complexity</strong> — Millions of interacting components and emergent behaviours.",
+      "<strong>Heterogeneity</strong> — Hardware, software, humans, and processes tightly coupled.",
+      "<strong>Dynamics</strong> — System behaviour evolves over time."
+    ]
+  },
+  { ch: 6, chTitle: "Chapter 6: Software-Intensive Systems — Manufacturing & Services",
+    q: "Why simulate Software-Intensive Systems?",
+    bullets: [
+      "<strong>Cost Reduction</strong> — Test design alternatives before committing to physical infrastructure.",
+      "<strong>Risk Mitigation</strong> — Identify failure modes and race conditions before production.",
+      "<strong>Time Compression</strong> — Run years of simulated operation in minutes.",
+      "<strong>'What-If' Analysis</strong> — Explore parameters without real-world consequences.",
+      "<strong>Training</strong> — Train operators before deploying complex systems."
+    ]
+  },
+  { ch: 6, chTitle: "Chapter 6: Software-Intensive Systems — Manufacturing & Services",
+    q: "How is simulation used in Production Line Manufacturing?",
+    prose: "Models manufacturing operations as a network of stations, buffers, and resources.",
+    bullets: [
+      "<strong>Bottleneck Analysis</strong> — Identify starved vs. blocked stations; optimise buffer sizes.",
+      "<strong>Failure & Maintenance</strong> — Model MTBF; schedule preventive vs. corrective maintenance.",
+      "<strong>Outputs</strong> — Cycle time, WIP inventory levels, resource utilisation, cost per unit."
+    ]
+  },
+  { ch: 6, chTitle: "Chapter 6: Software-Intensive Systems — Manufacturing & Services",
+    q: "How is simulation used in Healthcare?",
+    bullets: [
+      "<strong>ED Patient Flow</strong> — Models arrival surges, triage, bed availability, and bottlenecks.",
+      "<strong>Operating Theatre</strong> — Tests block vs. open scheduling to maximise utilisation.",
+      "<strong>Ward Bed Management</strong> — Predicts admission pressures and discharge delays.",
+      "<strong>Epidemic Modelling</strong> — SEIR models used for ICU capacity and vaccination planning."
+    ]
+  },
+  { ch: 6, chTitle: "Chapter 6: Software-Intensive Systems — Manufacturing & Services",
+    q: "What is the difference between DES and Continuous Simulation?",
+    bullets: [
+      "<strong>DES</strong> — State changes at specific event points; best for queues and manufacturing. Tools: Arena, SimPy.",
+      "<strong>Continuous</strong> — State changes over time using ODEs; best for fluid systems. Tools: Simulink, Vensim."
+    ]
+  },
+  { ch: 6, chTitle: "Chapter 6: Software-Intensive Systems — Manufacturing & Services",
+    q: "What simulation tools are available for SIS?",
+    bullets: [
+      "<strong>Arena / Simio</strong> — DES; visual flowchart builder, strong statistical output analysis.",
+      "<strong>AnyLogic</strong> — Multi-paradigm; DES + Agent-based + SD; GIS integration.",
+      "<strong>MATLAB Simulink</strong> — Continuous; HIL testing; code generation.",
+      "<strong>SimPy (Python)</strong> — DES; open source; integrates with ML/AI pipelines.",
+      "<strong>Vensim / STELLA</strong> — System Dynamics; causal loop diagrams; policy simulation."
+    ]
+  },
+  { ch: 6, chTitle: "Chapter 6: Software-Intensive Systems — Manufacturing & Services",
+    q: "What is a Digital Twin in Industry 4.0?",
+    prose: "A live simulation model continuously updated with sensor data from the physical factory. The twin predicts failures, optimises scheduling, and tests changes before physical implementation.",
+    prose2: "BMW reports 25% reduction in production planning time. Siemens Amberg plant achieves 99.99885% product quality."
+  },
+
+  // ── CHAPTER 7 ──
+  { ch: 7, chTitle: "Chapter 7: Urban Planning & Transportation",
+    q: "What are the three levels of detail in Traffic Simulation?",
+    bullets: [
+      "<strong>Macroscopic</strong> — Traffic as a fluid; models aggregate flow, density, and speed. Tools: VISUM, CUBE.",
+      "<strong>Mesoscopic</strong> — Vehicles in platoons; statistical distributions; balance of detail vs. speed.",
+      "<strong>Microscopic</strong> — Each vehicle modelled individually with car-following models. Tools: VISSIM, SUMO."
+    ]
+  },
+  { ch: 7, chTitle: "Chapter 7: Urban Planning & Transportation",
+    q: "What is the Four-Step Transport Demand Model?",
+    bullets: [
+      "<strong>Step 1 — Trip Generation:</strong> How many trips originate from and are attracted to each zone?",
+      "<strong>Step 2 — Trip Distribution:</strong> Which zones do trips connect? (Gravity model used.)",
+      "<strong>Step 3 — Mode Choice:</strong> How do travellers choose between car, bus, rail, walk, cycle?",
+      "<strong>Step 4 — Route Assignment:</strong> Which routes do vehicles/passengers take? (User Equilibrium)"
+    ]
+  },
+  { ch: 7, chTitle: "Chapter 7: Urban Planning & Transportation",
+    q: "How is simulation used in Public Transit?",
+    bullets: [
+      "<strong>Bus Bunching</strong> — Simulation tests holding strategies and signal priority to break the feedback loop.",
+      "<strong>Railway Capacity</strong> — OpenTrack/RailSys simulate train paths and identify conflicting paths.",
+      "<strong>Intermodal Hubs</strong> — Models pedestrian flows to minimise missed connections.",
+      "<strong>Demand-Responsive Transit</strong> — Agent-based simulation to optimise vehicle routing in real time."
+    ]
+  },
+  { ch: 7, chTitle: "Chapter 7: Urban Planning & Transportation",
+    q: "What is the Social Force Model?",
+    prose: "Pedestrians modelled as agents subject to three forces: (1) desired direction toward destination, (2) repulsive force from others and walls, (3) attraction force from interesting points. (Helbing & Molnár, 1995)",
+    prose2: "Used in VISSIM, Legion, and MassMotion for crowd simulation, evacuation, and shared space design."
+  },
+  { ch: 7, chTitle: "Chapter 7: Urban Planning & Transportation",
+    q: "What models are used for Urban Growth & Land Use?",
+    bullets: [
+      "<strong>Cellular Automata (SLEUTH)</strong> — Land use transitions based on slope, road influence, and sprawl.",
+      "<strong>Agent-Based (UrbanSim)</strong> — Households and firms as agents; simulates real estate markets over 30 years.",
+      "<strong>System Dynamics</strong> — Forrester's model showed housing policies can worsen urban poverty.",
+      "<strong>Transit-Oriented Development</strong> — Tests how new rail stations reshape land use over 10–25 years."
+    ]
+  },
+  { ch: 7, chTitle: "Chapter 7: Urban Planning & Transportation",
+    q: "What is an Urban Digital Twin? Give examples.",
+    prose: "A continuously updated, city-scale simulation model fed by IoT data streams enabling real-time what-if analysis.",
+    bullets: [
+      "<strong>Singapore</strong> — Virtual Singapore: 3D digital twin for solar, pedestrian, and emergency routing.",
+      "<strong>Amsterdam</strong> — Open data dashboard for real-time energy, waste, and traffic simulation.",
+      "<strong>Helsinki</strong> — District-level energy simulation toward carbon neutrality by 2035.",
+      "<strong>Songdo (South Korea)</strong> — Greenfield smart city designed entirely through simulation."
+    ]
+  },
+  { ch: 7, chTitle: "Chapter 7: Urban Planning & Transportation",
+    q: "What were the outcomes of the London Congestion Charging Zone?",
+    prose: "Introduced February 2003. Pre-launch simulation used the SATURN network model to forecast demand and revenue.",
+    bullets: [
+      "Traffic entering zone ↓ 18% in first year (predicted: 10–15%).",
+      "Cycling ↑ 28% within the zone; CO₂ emissions ↓ 20% in central London.",
+      "Revenue: £137M/year actual vs. £130M/year predicted.",
+      "<strong>Lesson:</strong> Simulation ≠ prediction — it's structured thinking."
+    ]
+  },
+  { ch: 7, chTitle: "Chapter 7: Urban Planning & Transportation",
+    q: "What does simulation reveal about Autonomous Vehicles?",
+    bullets: [
+      "At 50% mixed fleets, congestion may <strong>INCREASE</strong> due to conservative AV following behaviour.",
+      "Full CAV adoption shows motorway capacity increases of 40–80% (VISSIM simulations).",
+      "A SAV fleet 10% the size of private cars can serve 98% of trips — but total vehicle-km increases."
+    ]
+  }
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+const chapters = [...new Set(DATA.map(d => d.ch))];
+let activeChapter = 0; // 0 = all
+let deck = [];
+let idx = 0;
+let flipped = false;
+let scores = {}; // cardKey -> 'know' | 'review'
+
+function cardKey(card) { return card.ch + '|' + card.q; }
+
+function buildDeck() {
+  const src = activeChapter === 0 ? DATA : DATA.filter(d => d.ch === activeChapter);
+  deck = [...src];
+  idx = 0;
+  flipped = false;
+}
+
+function renderTabs() {
+  const wrap = document.getElementById('tabs');
+  wrap.innerHTML = '';
+  const all = document.createElement('button');
+  all.className = 'tab' + (activeChapter === 0 ? ' active' : '');
+  all.textContent = 'All';
+  all.onclick = () => { activeChapter = 0; buildDeck(); render(); };
+  wrap.appendChild(all);
+  chapters.forEach(c => {
+    const t = document.createElement('button');
+    t.className = 'tab' + (activeChapter === c ? ' active' : '');
+    t.textContent = 'Ch ' + c;
+    t.onclick = () => { activeChapter = c; buildDeck(); render(); };
+    wrap.appendChild(t);
+  });
+}
+
+function render() {
+  renderTabs();
+
+  const scene = document.getElementById('cardScene');
+  const done  = document.getElementById('doneBanner');
+
+  if (idx >= deck.length) {
+    scene.style.display = 'none';
+    done.classList.add('show');
+    document.getElementById('pbar').style.width = '100%';
+    document.getElementById('plabel').textContent = deck.length + ' / ' + deck.length;
+    document.getElementById('chTitle').textContent = '';
+    document.getElementById('btnNext').disabled = true;
+    document.getElementById('btnPrev').disabled = idx === 0;
+    renderScore();
+    return;
+  }
+
+  scene.style.display = 'block';
+  done.classList.remove('show');
+
+  const card = deck[idx];
+
+  // progress
+  const pct = deck.length > 1 ? (idx / (deck.length - 1)) * 100 : 100;
+  document.getElementById('pbar').style.width = pct + '%';
+  document.getElementById('plabel').textContent = (idx + 1) + ' / ' + deck.length;
+  document.getElementById('chTitle').textContent = card.chTitle;
+
+  // question
+  document.getElementById('cardQ').textContent = card.q;
+
+  // answer
+  const ans = document.getElementById('cardA');
+  ans.innerHTML = '';
+  if (card.prose) {
+    const p = document.createElement('div');
+    p.className = 'answer-prose';
+    p.textContent = card.prose;
+    ans.appendChild(p);
+  }
+  if (card.prose2) {
+    const p = document.createElement('div');
+    p.className = 'answer-prose';
+    p.textContent = card.prose2;
+    ans.appendChild(p);
+  }
+  if (card.bullets) {
+    const ul = document.createElement('ul');
+    card.bullets.forEach(b => {
+      const li = document.createElement('li');
+      li.innerHTML = b;
+      ul.appendChild(li);
+    });
+    ans.appendChild(ul);
+  }
+
+  // flip state
+  if (flipped) {
+    scene.classList.add('flipped');
+  } else {
+    scene.classList.remove('flipped');
+  }
+
+  document.getElementById('btnPrev').disabled = idx === 0;
+  document.getElementById('btnNext').disabled = false;
+
+  renderScore();
+}
+
+function renderScore() {
+  const know = Object.values(scores).filter(v => v === 'know').length;
+  const review = Object.values(scores).filter(v => v === 'review').length;
+  document.getElementById('scoreCounts').textContent =
+    '✓ ' + know + '  ↺ ' + review;
+}
+
+function flipCard() {
+  flipped = !flipped;
+  const scene = document.getElementById('cardScene');
+  if (flipped) scene.classList.add('flipped');
+  else scene.classList.remove('flipped');
+}
+
+function nextCard() {
+  if (idx < deck.length) {
+    idx++;
+    flipped = false;
+    render();
+  }
+}
+
+function prevCard() {
+  if (idx > 0) {
+    idx--;
+    flipped = false;
+    render();
+  }
+}
+
+function shuffleCards() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  idx = 0;
+  flipped = false;
+  render();
+}
+
+function markCard(type) {
+  if (idx < deck.length) {
+    scores[cardKey(deck[idx])] = type;
+    renderScore();
+  }
+}
+
+// keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextCard();
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevCard();
+  else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+});
+
+// init
+buildDeck();
+render();
+</script>
+
+</body>
+</html>
